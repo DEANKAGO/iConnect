@@ -7,13 +7,23 @@ gender_choices = (
 )
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    username  = models.CharField(max_length=60)
     profile_photo = models.ImageField(upload_to='photos/', null=True, blank=True)
-    age = models.IntegerField(null=False, blank=False)
+    age = models.IntegerField(null=True, blank=True)
     ethnicity = models.CharField(max_length=30, null=True, blank=True)
-    gender = models.CharField(choices=gender_choices, max_length=30, null=False, blank=False)
+    gender = models.CharField(choices=gender_choices, max_length=30, null=True, blank=True)
     location = models.CharField(max_length=30, null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     preference = models.TextField(max_length=500, blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.user.username} profile'
+
+    @classmethod
+    def search_profile(cls, name):
+        return cls.objects.filter(user__username__icontains=name).all()
+
+
 
 class Like(models.Model):
     created_on = models.DateField(auto_now_add=True)
