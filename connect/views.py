@@ -103,3 +103,13 @@ def update_profile(request):
     }
 
     return render(request, 'update_profile.html', context )
+
+
+
+
+
+
+
+
+def profile(self, *args, **kwargs):
+    return render(request)
