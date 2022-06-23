@@ -12,12 +12,9 @@ from django.contrib.auth import authenticate, login
 from .forms import *
 from django.core.mail import EmailMultiAlternatives
 from django.http.response import Http404, HttpResponse
+from django.views.generic import RedirectView
 
 # Create your views here.
-
-def pp(request):
-  return render(request, 'search.html')
-
 
 
 def search_profile(request):
@@ -60,8 +57,22 @@ def index(request):
 @login_required(login_url='login')
 def home(request):
     all_profiles = Profile.objects.all()
-    all_profiles = all_profiles[::-1]
-    return render(request, 'home.html', locals())
+
+    if request.method == "POST":
+        query = request.POST.get('username')
+        results = Profile.objects.filter(user__username=query)
+
+        context = {
+            'all_profiles': results,
+        }
+
+        return render(request, 'home.html', context)
+    
+    context = {
+            'all_profiles': all_profiles,
+        }
+
+    return render(request, 'home.html', context)
 
 
 def user_profile(request, username):
@@ -73,17 +84,22 @@ def user_profile(request, username):
     }
     return render(request, 'userprofile.html', params)
 
+@login_required(login_url='login')
 def profile(request, profile_id):
-    try:
-        user = User.objects.get(pk=profile_id)
-        profile=Profile.objects.get(user=user)
+    user = get_object_or_404(User, pk=profile_id)
+    is_catfished = False
+    can_update = False
+    if user.catfish.filter(id=request.user.id).exists():
+        is_catfished = True        
 
-        context = {
-            "profile":profile
-        }
-    except Profile.DoesNotExist:
-        raise Http404()
-    return render(request, 'userprofile.html',context)
+    if request.user == user:
+        can_update = True
+    else:
+        can_update = False
+    
+
+    context = {'user': user, 'can_update': can_update,}
+    return render(request, 'userprofile.html', context)
 
 def update_profile(request):
     user = request.user
@@ -105,11 +121,41 @@ def update_profile(request):
     return render(request, 'update_profile.html', context )
 
 
+class profileCatfishToggle(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        id = self.kwargs.get('id')
+        obj = get_object_or_404(User, pk=id)
+        url_ = obj.get_absolute_url(user)
+        user = self.request.user
+        if user in obj.catfish.all():
+            obj.catfish.remove(user)
+        else:
+            obj.catfish.add(user)
+        return url_
+
+
+def catfish_profile(request):
+    user = get_object_or_404(User, id=request.POST.get('id'))
+    is_catfished = False
+    if user.catfished.filter(id=request.user.id).exists():
+        user.catfish.remove(request.user)
+        is_catfished = False
+    else:
+        user.catfish.add(request.user)
+        is_catfished = False
+
+    params = {
+        'user': user,
+        'is_catfished': is_catfished,
+        'total_catfish': user.total_catfish()
+    }
+    return render(request, 'catfish_section.html', params, request=request)
+
+  
 
 
 
 
 
 
-def profile(self, *args, **kwargs):
-    return render(request)
+

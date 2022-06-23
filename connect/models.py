@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.dispatch import receiver
 
 gender_choices = (
     ("male", "male"),
@@ -19,6 +20,16 @@ class Profile(models.Model):
     preference = models.TextField(max_length=500, blank=True, null=True)
     catfish = models.ManyToManyField(User, related_name='catfish', blank=True)
     phone_number = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-pk"]
+
+    def get_absolute_url(self):
+        return f"/profile/{self.id}"
+
+    # def get_absolute_url(self):
+    #     from django.core.urlresolvers import reverse
+    #     return reverse('user.views.profileCatfishToggle', args=[str(self.id)])
 
     def save_profile(self):
         self.user
@@ -51,6 +62,7 @@ class Like(models.Model):
 
 
 class Message(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='receiver',on_delete=models.CASCADE)
     text = models.TextField(max_length=500, null=False, blank=False)
     created_on = models.DateField(auto_now_add=True)
