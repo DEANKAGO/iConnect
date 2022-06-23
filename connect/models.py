@@ -1,10 +1,12 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 gender_choices = (
-    ('male', 'male'),
-    ('female', 'female'),
+    ("male", "male"),
+    ("female", "female"),
 )
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     username  = models.CharField(max_length=60)
@@ -15,6 +17,17 @@ class Profile(models.Model):
     location = models.CharField(max_length=30, null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     preference = models.TextField(max_length=500, blank=True, null=True)
+    catfish = models.ManyToManyField(User, related_name='catfish', blank=True)
+    phone_number = models.IntegerField(blank=True, null=True)
+
+    def save_profile(self):
+        self.user
+
+    def delete_profile(self):
+        self.delete()
+
+    def total_catfish(self):
+        return self.catfish.count()
 
     def __str__(self):
         return f'{self.user.username} profile'
@@ -30,10 +43,11 @@ class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
-class Catfish(models.Model):
-    created_on = models.DateField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+
+# class Catfish(models.Model):
+#     created_on = models.DateField(auto_now_add=True)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
 
 class Message(models.Model):

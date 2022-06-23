@@ -5,5 +5,6 @@ from .models import *
 
 admin.site.register(Profile),
 admin.site.register(Like),
-admin.site.register(Catfish),
+# admin.site.register(Catfish),
 admin.site.register(Message),
+

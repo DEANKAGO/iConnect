@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <form class="form-inline" method="get" action="{% url 'search' %}">
+    {% csrf_token %}
+    <div class="md-form my-0">
+      <input
+        class="form-control mr-sm-2"
+        type="text"
+        placeholder="Search Profile"
+        name="username"
+        aria-label="Search"
+      />
+    </div>
+  </form>
+  
+</body>
+</html>
